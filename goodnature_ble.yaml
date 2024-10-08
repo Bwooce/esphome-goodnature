@@ -1,0 +1,77 @@
+esphome:
+  name: goodnature_ble_monitor
+  platform: ESP32
+  board: esp32dev
+
+wifi:
+  ssid: "Your_WiFi_SSID"
+  password: "Your_WiFi_Password"
+
+# Enable Home Assistant API
+api:
+
+# Enable OTA updates
+ota:
+
+# Enable logging
+logger:
+
+# Enable Web server
+web_server:
+  port: 80
+
+# Enable Bluetooth Low Energy
+esp32_ble_tracker:
+
+# Goodnature BLE component
+goodnature_ble:
+  devices:
+    - name: "Backyard Trap"
+      serial: "ABCDEF00"
+    - name: "Front Yard Trap"
+      serial: "12345600"
+
+# Sensor configurations
+sensor:
+  - platform: goodnature_ble
+    kill_count:
+      name: "Goodnature Kill Count"
+      id: goodnature_kill_count
+    battery_level:
+      name: "Goodnature Battery Level"
+      id: goodnature_battery_level
+    last_activation:
+      name: "Goodnature Last Activation"
+      id: goodnature_last_activation
+    total_activations:
+      name: "Goodnature Total Activations"
+      id: goodnature_total_activations
+    days_since_activation:
+      name: "Days Since Last Activation"
+      id: goodnature_days_since_activation
+
+  - platform: template
+    name: "Goodnature Device Name"
+    id: goodnature_device_name
+    lambda: return id(goodnature_component).last_seen_device;
+
+  - platform: template
+    name: "Goodnature Serial Number"
+    id: goodnature_serial_number
+    lambda: return id(goodnature_component).last_seen_serial;
+
+# Text sensors for additional information
+text_sensor:
+  - platform: template
+    name: "Last Seen Goodnature Device"
+    lambda: return id(goodnature_component).last_seen_device;
+
+  - platform: template
+    name: "Last Seen Goodnature Serial"
+    lambda: return id(goodnature_component).last_seen_serial;
+
+# Optional: Battery level binary sensor
+binary_sensor:
+  - platform: template
+    name: "Goodnature Battery Low"
+    lambda: return id(goodnature_battery_level).state < 20;
