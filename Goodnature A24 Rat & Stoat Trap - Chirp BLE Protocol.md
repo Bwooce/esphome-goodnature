@@ -1,3 +1,5 @@
+## From codyc1515@ at https://gist.github.com/codyc1515/a6b93850ad81db06cde5e76244cf96f5 as of 2024-10-08
+
 # Introduction
 Goodnature is a New Zealand based manufacturer of humane traps. Their model A24 trap targets Rat & Stoats. The device is triggered when a pest brushes past an activation pin. This causes the striker to activate instantly using the power of a small, replacable CO2 gas canister.
 
