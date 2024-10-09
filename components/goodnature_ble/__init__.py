@@ -6,8 +6,8 @@ from esphome.components import esp32_ble_tracker, sensor
 DEPENDENCIES = ['esp32_ble_tracker']
 AUTO_LOAD = ['sensor']
 
-goodnature_ns = cg.esphome_ns.namespace('goodnature')
-GoodnatureListener = goodnature_ns.class_('GoodnatureListener', esp32_ble_tracker.ESPBTDeviceListener, cg.Component)
+goodnature_ble_ns = cg.esphome_ns.namespace('goodnature_ble')
+GoodnatureBleListener = goodnature_ble_ns.class_('GoodnatureBleListener', esp32_ble_tracker.ESPBTDeviceListener, cg.Component)
 
 CONF_DEVICES = 'devices'
 CONF_SERIAL = 'serial'
@@ -23,7 +23,7 @@ DEVICE_SCHEMA = cv.Schema({
 })
 
 CONFIG_SCHEMA = cv.Schema({
-    cv.GenerateID(): cv.declare_id(GoodnatureListener),
+    cv.GenerateID(): cv.declare_id(GoodnatureBleListener),
     cv.Optional(CONF_DEVICES): cv.ensure_list(DEVICE_SCHEMA),
     cv.Optional(CONF_KILL_COUNT): sensor.sensor_schema(
         accuracy_decimals=0
