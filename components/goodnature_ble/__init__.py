@@ -36,7 +36,7 @@ CONFIG_SCHEMA = cv.Schema({
         accuracy_decimals=0
     ),
     cv.Optional(CONF_LAST_ACTIVATION): sensor.sensor_schema(
-        unit_of_measurement=UNIT_TIMESTAMP,
+        unit_of_measurement=UNIT_EMPTY,
         icon=ICON_CLOCK,
         accuracy_decimals=0
     ),
