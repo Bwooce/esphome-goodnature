@@ -1,9 +1,17 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import sensor
+from esphome.components import sensor, esp32_ble_tracker
 from esphome.const import CONF_ID
 
-from . import goodnature_ble_ns, GoodnatureBleListener
+#from . import goodnature_ble_ns, GoodnatureBleListener
+
+DEPENDENCIES = ["esp32_ble_tracker"]
+AUTO_LOAD = ["GoodnatureBLEListener"]
+
+GoodnatureBle_ns = cg.esphome_ns.namespace("GoodnatureBle")
+GoodnatureBle = GoodnatureBle_ns.class_(
+    "GoodnatureBle", esp32_ble_tracker.ESPBTDeviceListener, cg.Component
+)
 
 CONF_KILL_COUNT = 'kill_count'
 CONF_BATTERY_LEVEL = 'battery_level'
@@ -12,7 +20,7 @@ CONF_TOTAL_ACTIVATIONS = 'total_activations'
 CONF_DAYS_SINCE_ACTIVATION = 'days_since_activation'
 
 CONFIG_SCHEMA = cv.Schema({
-    #cv.GenerateID(): cv.declare_id(GoodnatureBleListener),
+    cv.GenerateID(): cv.declare_id(GoodnatureBle),
     cv.Optional(CONF_KILL_COUNT): sensor.sensor_schema(
         accuracy_decimals=0
     ),
@@ -28,7 +36,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_DAYS_SINCE_ACTIVATION): sensor.sensor_schema(
         accuracy_decimals=1
     ),
-})
+}).extend(esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
