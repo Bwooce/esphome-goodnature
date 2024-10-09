@@ -1,6 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.const import CONF_ID, CONF_NAME, UNIT_EMPTY, ICON_COUNTER, UNIT_PERCENT, ICON_BATTERY, UNIT_DAYS
+from esphome.const import CONF_ID, CONF_NAME
 from esphome.components import esp32_ble_tracker, sensor
 
 DEPENDENCIES = ['esp32_ble_tracker']
@@ -26,26 +26,18 @@ CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(GoodnatureListener),
     cv.Optional(CONF_DEVICES): cv.ensure_list(DEVICE_SCHEMA),
     cv.Optional(CONF_KILL_COUNT): sensor.sensor_schema(
-        unit_of_measurement=UNIT_EMPTY,
-        icon=ICON_COUNTER,
         accuracy_decimals=0
     ),
     cv.Optional(CONF_BATTERY_LEVEL): sensor.sensor_schema(
-        unit_of_measurement=UNIT_PERCENT,
-        icon=ICON_BATTERY,
         accuracy_decimals=0
     ),
     cv.Optional(CONF_LAST_ACTIVATION): sensor.sensor_schema(
-        unit_of_measurement=UNIT_EMPTY,
         accuracy_decimals=0
     ),
     cv.Optional(CONF_TOTAL_ACTIVATIONS): sensor.sensor_schema(
-        unit_of_measurement=UNIT_EMPTY,
-        icon=ICON_COUNTER,
         accuracy_decimals=0
     ),
     cv.Optional(CONF_DAYS_SINCE_ACTIVATION): sensor.sensor_schema(
-        unit_of_measurement=UNIT_DAYS,
         accuracy_decimals=1
     ),
 }).extend(esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA)
