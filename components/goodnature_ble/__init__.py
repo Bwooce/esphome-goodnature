@@ -21,13 +21,17 @@ CONFIG_SCHEMA = cv.All(
     cv.only_on_esp32,
     cv.Schema({
         cv.GenerateID(): cv.declare_id(GoodnatureBleListener),
+        cv.Optional(CONF_DEVICES): cv.ensure_list(DEVICE_SCHEMA),
     }).extend(esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA)
 )
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await esp32_ble_tracker.register_ble_device(var, config)
-#
+    if CONF_DEVICES in config:
+        for device in config[CONF_DEVICES]:
+            cg.add(var.add_device(device[CONF_NAME], device[CONF_SERIAL]))
+
 #CONFIG_SCHEMA = esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA({
 #    cv.GenerateID(): cv.declare_id(GoodnatureBleListener),
 #    cv.Optional(CONF_DEVICES): cv.ensure_list(DEVICE_SCHEMA),
@@ -38,6 +42,4 @@ async def to_code(config):
 #    await cg.register_component(var, config)
 #    await esp32_ble_tracker.register_ble_device(var, config)
 
-#    if CONF_DEVICES in config:
-#        for device in config[CONF_DEVICES]:
-#            cg.add(var.add_device(device[CONF_NAME], device[CONF_SERIAL]))
+
