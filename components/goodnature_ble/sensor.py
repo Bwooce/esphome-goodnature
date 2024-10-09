@@ -6,7 +6,6 @@ from esphome.const import CONF_ID
 #from . import goodnature_ble_ns, GoodnatureBleListener
 
 DEPENDENCIES = ["esp32_ble_tracker"]
-AUTO_LOAD = ["GoodnatureBLEListener"]
 
 GoodnatureBle_ns = cg.esphome_ns.namespace("GoodnatureBle")
 GoodnatureBle = GoodnatureBle_ns.class_(
