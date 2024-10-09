@@ -19,7 +19,7 @@ class GoodnatureBleListener : public esp32_ble_tracker::ESPBTDeviceListener, pub
   void dump_config() override;
 
  protected:
-  void parse_kill_info(const std::string &data);
+  void parse_kill_info(const std::vector<unsigned char> &data);
   std::string reverse_serial(const std::string &serial);
   uint32_t parse_timestamp(const std::string &data);
 

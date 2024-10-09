@@ -30,14 +30,14 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
   return false;
 }
 
-void GoodnatureBleListener::parse_kill_info(const std::string &data) {
+void GoodnatureBleListener::parse_kill_info(const std::vector<unsigned char> &data) {
   if (data.length() < 22) {
     ESP_LOGE(TAG, "Invalid kill info data length");
     return;
   }
 
   // Extract serial number (positions 2-9, reversed)
-  std::string serial = data.substr(2, 8);
+  std::string serial(data.begin() + 2, data.begin() + 10);
   serial = reverse_serial(serial);
   
   // Extract kill count (position 20)
