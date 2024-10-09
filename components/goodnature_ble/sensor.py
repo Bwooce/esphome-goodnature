@@ -12,8 +12,7 @@ CONF_TOTAL_ACTIVATIONS = 'total_activations'
 CONF_DAYS_SINCE_ACTIVATION = 'days_since_activation'
 
 CONFIG_SCHEMA = cv.Schema({
-    cv.GenerateID(): cv.declare_id(GoodnatureBleListener),
-    cv.Optional(CONF_DEVICES): cv.ensure_list(DEVICE_SCHEMA),
+    #cv.GenerateID(): cv.declare_id(GoodnatureBleListener),
     cv.Optional(CONF_KILL_COUNT): sensor.sensor_schema(
         accuracy_decimals=0
     ),
@@ -32,7 +31,7 @@ CONFIG_SCHEMA = cv.Schema({
 })
 
 async def to_code(config):
-    var = cg.new_Pvariable(config[CONF_ID])
+    var = cg.new_Pvariable(config["id2"])
     #await sensor.register_sensor(var, config)
     if CONF_KILL_COUNT in config:
         sens = await sensor.new_sensor(config[CONF_KILL_COUNT])
