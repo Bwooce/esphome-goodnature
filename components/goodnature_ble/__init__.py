@@ -4,7 +4,7 @@ from esphome.const import CONF_ID, CONF_NAME
 from esphome.components import esp32_ble_tracker
 
 DEPENDENCIES = ['esp32_ble_tracker']
-AUTO_LOAD = ['sensor']
+#AUTO_LOAD = ['sensor']
 
 goodnature_ble_ns = cg.esphome_ns.namespace('goodnature_ble')
 GoodnatureBleListener = goodnature_ble_ns.class_('GoodnatureBleListener', esp32_ble_tracker.ESPBTDeviceListener, cg.Component)
@@ -19,7 +19,9 @@ DEVICE_SCHEMA = cv.Schema({
 
 CONFIG_SCHEMA = cv.All(
     cv.only_on_esp32,
-    cv.Schema({}).extend(esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA)
+    cv.Schema({
+        cv.GenerateID(): cv.declare_id(GoodnatureBleListener),
+    }).extend(esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA)
 )
 
 async def to_code(config):
