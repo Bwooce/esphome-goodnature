@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor
-from esphome.const import CONF_ID, UNIT_EMPTY, ICON_COUNTER
+from esphome.const import CONF_ID
 
 from . import goodnature_ble_ns, GoodnatureBleListener
 

@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.const import CONF_ID, CONF_NAME
-from esphome.components import esp32_ble_tracker, sensor
+from esphome.components import esp32_ble_tracker
 
 DEPENDENCIES = ['esp32_ble_tracker']
 AUTO_LOAD = ['sensor']
@@ -20,7 +20,7 @@ DEVICE_SCHEMA = cv.Schema({
 CONFIG_SCHEMA = esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA({
     cv.GenerateID(): cv.declare_id(GoodnatureBleListener),
     cv.Optional(CONF_DEVICES): cv.ensure_list(DEVICE_SCHEMA),
-}).extend(cv.COMPONENT_SCHEMA)
+}).extend(esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
