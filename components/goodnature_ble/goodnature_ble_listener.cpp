@@ -20,7 +20,7 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
 
   auto services = device.get_service_datas();
   for (auto &service_data : services) {
-    if (service_data.uuid.contains(0x0000D00D, 0x1212, 0xEFDE, 0x1523785FEF13D123)) {
+    if (service_data.uuid.contains(0xD3, 0x0D)) {
       auto kill_info = service_data.data;
       parse_kill_info(kill_info);
       return true;
