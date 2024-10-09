@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import esp32_ble_tracker, sensor
 from esphome.const import CONF_ID, CONF_NAME, UNIT_EMPTY, ICON_COUNTER, UNIT_PERCENT, ICON_BATTERY, ICON_CLOCK, UNIT_DAYS, ICON_CALENDAR_CLOCK
+from esphome.components import esp32_ble_tracker, sensor
 
 DEPENDENCIES = ['esp32_ble_tracker']
 AUTO_LOAD = ['sensor']
