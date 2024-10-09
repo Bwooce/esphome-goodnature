@@ -1,6 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.const import CONF_ID, CONF_NAME, UNIT_EMPTY, ICON_COUNTER, UNIT_PERCENT, ICON_BATTERY, ICON_CLOCK, UNIT_DAYS, ICON_CALENDAR_CLOCK
+from esphome.const import CONF_ID, CONF_NAME, UNIT_EMPTY, ICON_COUNTER, UNIT_PERCENT, ICON_BATTERY, UNIT_DAYS
 from esphome.components import esp32_ble_tracker, sensor
 
 DEPENDENCIES = ['esp32_ble_tracker']
@@ -37,7 +37,6 @@ CONFIG_SCHEMA = cv.Schema({
     ),
     cv.Optional(CONF_LAST_ACTIVATION): sensor.sensor_schema(
         unit_of_measurement=UNIT_EMPTY,
-        icon=ICON_CLOCK,
         accuracy_decimals=0
     ),
     cv.Optional(CONF_TOTAL_ACTIVATIONS): sensor.sensor_schema(
@@ -47,7 +46,6 @@ CONFIG_SCHEMA = cv.Schema({
     ),
     cv.Optional(CONF_DAYS_SINCE_ACTIVATION): sensor.sensor_schema(
         unit_of_measurement=UNIT_DAYS,
-        icon=ICON_CALENDAR_CLOCK,
         accuracy_decimals=1
     ),
 }).extend(esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA)
