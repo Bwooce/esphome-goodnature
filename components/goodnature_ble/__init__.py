@@ -17,7 +17,9 @@ DEVICE_SCHEMA = cv.Schema({
     cv.Required(CONF_SERIAL): cv.string,
 })
 
-CONFIG_SCHEMA = cv.Schema({}).extend(esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA)
+CONFIG_SCHEMA = cv.All(
+    cv.only_on_esp32,
+    cv.Schema({})).extend(esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])

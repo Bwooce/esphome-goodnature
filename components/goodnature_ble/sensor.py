@@ -12,7 +12,7 @@ CONF_TOTAL_ACTIVATIONS = 'total_activations'
 CONF_DAYS_SINCE_ACTIVATION = 'days_since_activation'
 
 CONFIG_SCHEMA = cv.Schema({
-    cv.GenerateID(): cv.declare_id(GoodnatureBleListener),
+    #cv.GenerateID(): cv.declare_id(GoodnatureBleListener),
     cv.Optional(CONF_KILL_COUNT): sensor.sensor_schema(
         accuracy_decimals=0
     ),
