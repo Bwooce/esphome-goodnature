@@ -1,5 +1,5 @@
 #pragma once
-
+#include <map>
 #include "esphome/core/component.h"
 #include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
 #include "esphome/components/sensor/sensor.h"
