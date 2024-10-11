@@ -21,7 +21,7 @@ class GoodnatureBleListener : public esp32_ble_tracker::ESPBTDeviceListener, pub
  protected:
   void parse_kill_info(const std::vector<unsigned char> &data);
   std::string reverse_serial(const std::string &serial);
-  uint32_t parse_timestamp(const std::string &data);
+  uint32_t parse_timestamp(const std::vector<unsigned char> &data);
 
  private:
   sensor::Sensor *kill_count_sensor_{nullptr};

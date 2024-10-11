@@ -31,7 +31,7 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
 }
 
 void GoodnatureBleListener::parse_kill_info(const std::vector<unsigned char> &data) {
-  if (data.length() < 22) {
+  if (data.size() < 22) {
     ESP_LOGE(TAG, "Invalid kill info data length");
     return;
   }
@@ -95,11 +95,11 @@ std::string GoodnatureBleListener::reverse_serial(const std::string &serial) {
   return reversed;
 }
 
-uint32_t GoodnatureBleListener::parse_timestamp(const std::string &data) {
+uint32_t GoodnatureBleListener::parse_timestamp(const std::vector<unsigned char> &data) {
   // This is a placeholder implementation. You might need to adjust this based on the actual data format.
   uint32_t timestamp = 0;
   for (int i = 0; i < 4; i++) {
-    timestamp |= static_cast<uint32_t>(static_cast<uint8_t>(data[i])) << (8 * i);
+    timestamp |= static_cast<uint32_t>(data[i]) << (8 * i);
   }
   return timestamp;
 }
