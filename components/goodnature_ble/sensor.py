@@ -7,9 +7,9 @@ from esphome.const import CONF_ID
 
 DEPENDENCIES = ["esp32_ble_tracker"]
 
-GoodnatureBle_ns = cg.esphome_ns.namespace("GoodnatureBle")
+GoodnatureBle_ns = cg.esphome_ns.namespace("goodnature_ble")
 GoodnatureBle = GoodnatureBle_ns.class_(
-    "GoodnatureBle", esp32_ble_tracker.ESPBTDeviceListener, cg.Component
+    "GoodnatureBleListener", esp32_ble_tracker.ESPBTDeviceListener, cg.Component
 )
 
 CONF_KILL_COUNT = 'kill_count'
