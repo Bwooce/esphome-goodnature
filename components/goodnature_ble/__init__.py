@@ -27,6 +27,7 @@ CONFIG_SCHEMA = cv.All(
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
+    await cg.register_component(var, config)
     await esp32_ble_tracker.register_ble_device(var, config)
     if CONF_DEVICES in config:
         for device in config[CONF_DEVICES]:

@@ -13,6 +13,7 @@ void GoodnatureBleListener::add_device(const std::string &name, const std::strin
 
 bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &device) {
   if (device.get_name() != "GN") {
+    ESP_LOGE(TAG, "Not Goodnature device");
     return false;
   }
 
