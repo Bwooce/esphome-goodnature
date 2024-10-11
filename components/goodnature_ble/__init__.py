@@ -4,7 +4,7 @@ from esphome.const import CONF_ID, CONF_NAME
 from esphome.components import esp32_ble_tracker
 
 DEPENDENCIES = ['esp32_ble_tracker']
-#AUTO_LOAD = ['sensor']
+AUTO_LOAD = ['sensor']
 
 goodnature_ble_ns = cg.esphome_ns.namespace('goodnature_ble')
 GoodnatureBleListener = goodnature_ble_ns.class_('GoodnatureBleListener', esp32_ble_tracker.ESPBTDeviceListener, cg.Component)
