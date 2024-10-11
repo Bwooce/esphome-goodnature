@@ -48,7 +48,7 @@ void GoodnatureBleListener::parse_kill_info(const std::vector<unsigned char> &da
   battery_level_ = static_cast<uint8_t>(data[10]);
 
   // Extract last activation timestamp (positions 11-14, this might need adjustment)
-  std::vector<uint8_t> timestamp(data.begin+11, data.begin+15);
+  std::vector<uint8_t> timestamp(data.begin()+11, data.begin()+15);
   last_activation_ = parse_timestamp(timestamp);
 
   // Calculate total activations (cumulative kill count, this might need adjustment)
