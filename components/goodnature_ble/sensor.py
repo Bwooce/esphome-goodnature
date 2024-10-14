@@ -11,6 +11,7 @@ from esphome.const import (
     ICON_SECURITY,
     ICON_BATTERY,
     UNIT_PERCENT,
+    UNIT_TIMESTAMP,
     DEVICE_CLASS_EMPTY,
     DEVICE_CLASS_BATTERY,
     DEVICE_CLASS_TIMESTAMP,
@@ -34,25 +35,24 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_NAME): cv.valid_name,
     cv.Optional(CONF_MAC_ADDRESS): cv.mac_address,
     cv.Optional(CONF_KILL_COUNT): sensor.sensor_schema(
-        UNIT_EMPTY,
-        ICON_SECURITY,
-        0,
-        DEVICE_CLASS_EMPTY,
-        STATE_CLASS_TOTAL_INCREASING,
+        unit_of_measurement=UNIT_EMPTY,
+        icon=ICON_SECURITY,
+        accuracy_decimals=0,
+        device_class=DEVICE_CLASS_EMPTY,
+        tate_class=STATE_CLASS_TOTAL_INCREASING,
     ),
     cv.Optional(CONF_BATTERY_LEVEL): sensor.sensor_schema(
-        UNIT_PERCENT,
-        ICON_BATTERY,
-        0,
-        DEVICE_CLASS_BATTERY,
-        STATE_CLASS_MEASUREMENT,
+        Uunit_of_measurement=UNIT_PERCENT,
+        icon=ICON_BATTERY,
+        accuracy_decimals=0,
+        device_class=DEVICE_CLASS_BATTERY,
+        tate_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(CONF_LAST_ACTIVATION): sensor.sensor_schema(
-        UNIT_EMPTY,
-        ICON_EMPTY,
-        0,
-        DEVICE_CLASS_TIMESTAMP,
-        STATE_CLASS_MEASUREMENT
+        unit_of_measurement=UNIT_TIMESTAMP,
+        icon=ICON_EMPTY,
+        device_class=DEVICE_CLASS_TIMESTAMP,
+        tate_class=STATE_CLASS_MEASUREMENT
     ),
 }).extend(esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA)
 
