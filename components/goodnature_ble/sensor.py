@@ -11,7 +11,6 @@ from esphome.const import (
     ICON_SECURITY,
     ICON_BATTERY,
     UNIT_PERCENT,
-    UNIT_TIMESTAMP,
     DEVICE_CLASS_EMPTY,
     DEVICE_CLASS_BATTERY,
     DEVICE_CLASS_TIMESTAMP,
@@ -49,7 +48,6 @@ CONFIG_SCHEMA = cv.Schema({
         tate_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(CONF_LAST_ACTIVATION): sensor.sensor_schema(
-        unit_of_measurement=UNIT_TIMESTAMP,
         icon=ICON_EMPTY,
         device_class=DEVICE_CLASS_TIMESTAMP,
         tate_class=STATE_CLASS_MEASUREMENT
