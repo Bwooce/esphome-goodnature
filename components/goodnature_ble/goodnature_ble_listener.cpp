@@ -76,10 +76,6 @@ void GoodnatureBleListener::parse_kill_info(uint64_t address, const std::vector<
     if (last_activation_sensor_ != nullptr) {
       last_activation_sensor_->publish_state(this->last_activation_);
     }
-
-    if (total_activations_sensor_ != nullptr) {
-      total_activations_sensor_->publish_state(this->total_activations_);
-    }
   }
   this->last_seen_serial_ = serial;
   this->last_seen_mac_address_ = address;
@@ -108,9 +104,9 @@ uint32_t GoodnatureBleListener::parse_timestamp(const std::vector<unsigned char>
 
 void GoodnatureBleListener::dump_config() {
   ESP_LOGCONFIG(TAG, "Goodnature BLE");
-  LOG_SENSOR("  ", "Kill Count", this->kill_count_);
-  LOG_SENSOR("  ", "Battery Level", this->battery_level_);
-  LOG_SENSOR("  ", "Last Activation", this->last_activation_);
+  LOG_SENSOR("  ", "Kill Count", kill_count_);
+  LOG_SENSOR("  ", "Battery Level", battery_level_);
+  LOG_SENSOR("  ", "Last Activation", last_activation_);
 }
 
 } // namespace goodnature_ble
