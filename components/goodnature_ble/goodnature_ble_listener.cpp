@@ -49,46 +49,43 @@ void GoodnatureBleListener::parse_kill_info(uint64_t address, const std::vector<
   serial = reverse_serial(serial);
 
   // if a mac address is configured then use it, otherwise just try this one
-  if(adddress == mac_address_ || mac_address_ == 0) {
+  if(address == this->mac_address_ || this->mac_address_ == 0) {
     
     // Extract kill count (position 20)
     char kill_count_char = data[20];
-    kill_count_ = kill_count_char - '0';
+    this->kill_count_ = kill_count_char - '0';
 
     // Extract battery level (example: position 10, this might need adjustment)
-    battery_level_ = static_cast<uint8_t>(data[10]);
+    this->battery_level_ = static_cast<uint8_t>(data[10]);
 
     // Extract last activation timestamp (positions 11-14, this might need adjustment)
     std::vector<uint8_t> timestamp(data.begin()+11, data.begin()+15);
-    last_activation_ = parse_timestamp(timestamp);
+    this->last_activation_ = parse_timestamp(timestamp);
 
-    // Calculate total activations (cumulative kill count, this might need adjustment)
-    total_activations_ += kill_count_;
-
-    ESP_LOGI(TAG, "Goodnature device: %s (Serial: %s), Kill count: %d, Battery: %d%%, Last activation: %u",
-            last_seen_device_.c_str(), serial.c_str(), kill_count_, battery_level_, last_activation_);
+    ESP_LOGI(TAG, "Goodnature device: %x (Serial: %s), Kill count: %d, Battery: %d%%, Last activation: %u",
+            this->mac_address_, this->serial_.c_str(), this->kill_count_, this->battery_level_, this->last_activation_);
 
     if (kill_count_sensor_ != nullptr) {
-      kill_count_sensor_->publish_state(kill_count_);
+      kill_count_sensor_->publish_state(this->kill_count_);
     }
 
     if (battery_level_sensor_ != nullptr) {
-      battery_level_sensor_->publish_state(battery_level_);
+      battery_level_sensor_->publish_state(this->battery_level_);
     }
 
     if (last_activation_sensor_ != nullptr) {
-      last_activation_sensor_->publish_state(last_activation_);
+      last_activation_sensor_->publish_state(this->last_activation_);
     }
 
     if (total_activations_sensor_ != nullptr) {
-      total_activations_sensor_->publish_state(total_activations_);
+      total_activations_sensor_->publish_state(this->total_activations_);
     }
   }
-  last_seen_serial_ = serial;
-  last_seen_mac_address_ = address;
+  this->last_seen_serial_ = serial;
+  this->last_seen_mac_address_ = address;
 
-  if (last_seen_mac_address_ == 0) {
-    last_seen_serial_ = "Unknown";
+  if (this->last_seen_mac_address_ == 0) {
+    this->last_seen_serial_ = "Unknown";
   }
 }
 
