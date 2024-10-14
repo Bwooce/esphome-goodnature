@@ -11,7 +11,7 @@ The device is also available with an optional visual counter or a Bluetooth Low 
 * Because the Chirp does not have Wi-Fi or Cellular, this can make notifications unreliable as you need to be within proximity of the Chirp (Bluetooth range) to receive them.
 
 ## Hardware
-The Chirp device seems to have an unregistered MAC Address prefix of D7:AC:E9.
+The Chirp device seems to have an unregistered MAC Address prefix of D7:AC:E9. (or D3:58:7F)
 
 The Bluetooth chip in the Chirp appears to be from Nordic, as BLE services for Nordic firmware updates are present.
 

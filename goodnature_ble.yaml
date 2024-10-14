@@ -23,16 +23,11 @@ web_server:
 # Enable Bluetooth Low Energy
 esp32_ble_tracker:
 
-# Goodnature BLE component
-goodnature_ble:
-  devices:
-    - name: "Backyard Trap"
-      serial: "ABCDEF00"
-    - name: "Front Yard Trap"
-      serial: "12345600"
-
 # Sensor configurations
 sensor:
+  - platform: goodnature_ble
+    mac_address: "D3:58:7F:15:99:0B"
+    name: "Front yard trap"
   - platform: goodnature_ble
     kill_count:
       name: "Goodnature Kill Count"
@@ -43,35 +38,4 @@ sensor:
     last_activation:
       name: "Goodnature Last Activation"
       id: goodnature_last_activation
-    total_activations:
-      name: "Goodnature Total Activations"
-      id: goodnature_total_activations
-    days_since_activation:
-      name: "Days Since Last Activation"
-      id: goodnature_days_since_activation
 
-  - platform: template
-    name: "Goodnature Device Name"
-    id: goodnature_device_name
-    lambda: return id(goodnature_component).last_seen_device;
-
-  - platform: template
-    name: "Goodnature Serial Number"
-    id: goodnature_serial_number
-    lambda: return id(goodnature_component).last_seen_serial;
-
-# Text sensors for additional information
-text_sensor:
-  - platform: template
-    name: "Last Seen Goodnature Device"
-    lambda: return id(goodnature_component).last_seen_device;
-
-  - platform: template
-    name: "Last Seen Goodnature Serial"
-    lambda: return id(goodnature_component).last_seen_serial;
-
-# Optional: Battery level binary sensor
-binary_sensor:
-  - platform: template
-    name: "Goodnature Battery Low"
-    lambda: return id(goodnature_battery_level).state < 20;

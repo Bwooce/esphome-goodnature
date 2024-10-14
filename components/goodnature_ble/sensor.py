@@ -1,11 +1,25 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor, esp32_ble_tracker
-from esphome.const import CONF_ID
+from esphome.const import (
+    CONF_BATTERY_LEVEL,
+    CONF_MAC_ADDRESS,
+    STATE_CLASS_MEASUREMENT,
+    STATE_CLASS_TOTAL_INCREASING,
+    UNIT_EMPTY,
+    ICON_EMPTY,
+    ICON_SECURITY,
+    ICON_BATTERY,
+    UNIT_PERCENT,
+    DEVICE_CLASS_EMPTY,
+    DEVICE_CLASS_BATTERY,
+    DEVICE_CLASS_TIMESTAMP,
+    CONF_ID,
+    CONF_NAME,
+)
 
-#from . import goodnature_ble_ns, GoodnatureBleListener
-
-DEPENDENCIES = ["esp32_ble_tracker"]
+DEPENDENCIES = ['esp32_ble_tracker']
+AUTO_LOAD = ['sensor']
 
 GoodnatureBle_ns = cg.esphome_ns.namespace("goodnature_ble")
 GoodnatureBle = GoodnatureBle_ns.class_(
@@ -13,37 +27,49 @@ GoodnatureBle = GoodnatureBle_ns.class_(
 )
 
 CONF_KILL_COUNT = 'kill_count'
-CONF_BATTERY_LEVEL = 'battery_level'
 CONF_LAST_ACTIVATION = 'last_activation'
-CONF_TOTAL_ACTIVATIONS = 'total_activations'
-CONF_DAYS_SINCE_ACTIVATION = 'days_since_activation'
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(GoodnatureBle),
+    cv.Optional(CONF_NAME): cv.name,
+    cv.Optional(CONF_MAC_ADDRESS): cv.mac_address,   
     cv.Optional(CONF_KILL_COUNT): sensor.sensor_schema(
-        accuracy_decimals=0
+        UNIT_EMPTY,
+        ICON_SECURITY,
+        0,
+        STATE_CLASS_TOTAL_INCREASING,
     ),
     cv.Optional(CONF_BATTERY_LEVEL): sensor.sensor_schema(
-        accuracy_decimals=0
+        UNIT_PERCENT,
+        ICON_BATTERY,
+        0,
+        DEVICE_CLASS_BATTERY,
+        STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(CONF_LAST_ACTIVATION): sensor.sensor_schema(
-        accuracy_decimals=0
-    ),
-    cv.Optional(CONF_TOTAL_ACTIVATIONS): sensor.sensor_schema(
-        accuracy_decimals=0
-    ),
-    cv.Optional(CONF_DAYS_SINCE_ACTIVATION): sensor.sensor_schema(
-        accuracy_decimals=1
+        UNIT_EMPTY,
+        ICON_EMPTY,
+        0,
+        DEVICE_CLASS_TIMESTAMP,
+        STATE_CLASS_MEASUREMENT
     ),
 }).extend(esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-    #await sensor.register_sensor(var, config)
+    await cg.register_component(var, config)
+    await esp32_ble_tracker.register_ble_device(var, config)
+
+    if CONF_MAC_ADDRESS in config:
+        cg.add(var.set_address(config[CONF_MAC_ADDRESS].as_hex))
+
+    if CONF_NAME in config:
+        cg.add(var.set_name(config[CONF_NAME].as_string))
+
     if CONF_KILL_COUNT in config:
         sens = await sensor.new_sensor(config[CONF_KILL_COUNT])
         cg.add(var.set_kill_count_sensor(sens))
-    
+        
     if CONF_BATTERY_LEVEL in config:
         sens = await sensor.new_sensor(config[CONF_BATTERY_LEVEL])
         cg.add(var.set_battery_level_sensor(sens))
@@ -52,10 +78,3 @@ async def to_code(config):
         sens = await sensor.new_sensor(config[CONF_LAST_ACTIVATION])
         cg.add(var.set_last_activation_sensor(sens))
     
-    if CONF_TOTAL_ACTIVATIONS in config:
-        sens = await sensor.new_sensor(config[CONF_TOTAL_ACTIVATIONS])
-        cg.add(var.set_total_activations_sensor(sens))
-    
-    if CONF_DAYS_SINCE_ACTIVATION in config:
-        sens = await sensor.new_sensor(config[CONF_DAYS_SINCE_ACTIVATION])
-        cg.add(var.set_days_since_activation_sensor(sens))
