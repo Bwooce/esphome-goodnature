@@ -34,14 +34,13 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_NAME): cv.valid_name,
     cv.Optional(CONF_MAC_ADDRESS): cv.mac_address,
     cv.Optional(CONF_KILL_COUNT): sensor.sensor_schema(
-        unit_of_measurement=UNIT_EMPTY,
         icon=ICON_SECURITY,
         accuracy_decimals=0,
         device_class=DEVICE_CLASS_EMPTY,
         state_class=STATE_CLASS_TOTAL_INCREASING,
     ),
     cv.Optional(CONF_BATTERY_LEVEL): sensor.sensor_schema(
-        Uunit_of_measurement=UNIT_PERCENT,
+        unit_of_measurement=UNIT_PERCENT,
         icon=ICON_BATTERY,
         accuracy_decimals=0,
         device_class=DEVICE_CLASS_BATTERY,
