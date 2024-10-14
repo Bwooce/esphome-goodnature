@@ -38,19 +38,19 @@ CONFIG_SCHEMA = cv.Schema({
         icon=ICON_SECURITY,
         accuracy_decimals=0,
         device_class=DEVICE_CLASS_EMPTY,
-        tate_class=STATE_CLASS_TOTAL_INCREASING,
+        state_class=STATE_CLASS_TOTAL_INCREASING,
     ),
     cv.Optional(CONF_BATTERY_LEVEL): sensor.sensor_schema(
         Uunit_of_measurement=UNIT_PERCENT,
         icon=ICON_BATTERY,
         accuracy_decimals=0,
         device_class=DEVICE_CLASS_BATTERY,
-        tate_class=STATE_CLASS_MEASUREMENT,
+        state_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(CONF_LAST_ACTIVATION): sensor.sensor_schema(
         icon=ICON_EMPTY,
         device_class=DEVICE_CLASS_TIMESTAMP,
-        tate_class=STATE_CLASS_MEASUREMENT
+        state_class=STATE_CLASS_MEASUREMENT
     ),
 }).extend(esp32_ble_tracker.ESP_BLE_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA)
 
