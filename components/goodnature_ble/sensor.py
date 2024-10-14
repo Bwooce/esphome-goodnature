@@ -59,7 +59,7 @@ async def to_code(config):
     await esp32_ble_tracker.register_ble_device(var, config)
 
     if CONF_MAC_ADDRESS in config:
-        cg.add(var.set_address(config[CONF_MAC_ADDRESS].as_hex))
+        cg.add(var.set_mac_address(config[CONF_MAC_ADDRESS].as_hex))
 
     if CONF_NAME in config:
         cg.add(var.set_name(config[CONF_NAME]))

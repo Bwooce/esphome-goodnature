@@ -30,7 +30,7 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
   for (auto &service_data : services) {
     if (service_data.uuid.contains(0xD3, 0x0D)) {
       auto kill_info = service_data.data;
-      parse_kill_info(kill_info);
+      parse_kill_info(device.address_uint64(), kill_info);
       return true;
     }
   }
@@ -49,7 +49,7 @@ void GoodnatureBleListener::parse_kill_info(uint64 address, const std::vector<un
   serial = reverse_serial(serial);
 
   // if a mac address is configured then use it, otherwise just try this one
-  if(adddress == address_ || address_ == 0) {
+  if(adddress == mac_address_ || mac_address_ == 0) {
     
     // Extract kill count (position 20)
     char kill_count_char = data[20];
@@ -85,9 +85,9 @@ void GoodnatureBleListener::parse_kill_info(uint64 address, const std::vector<un
     }
   }
   last_seen_serial_ = serial;
-  last_seen_address_ = address;
+  last_seen_mac_address_ = address;
 
-  if (last_seen_device_ == 0) {
+  if (last_seen_mac_address_ == 0) {
     last_seen_serial_ = "Unknown";
   }
 }
