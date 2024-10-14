@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <string>
 #include "esphome/core/component.h"
 #include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
 #include "esphome/components/sensor/sensor.h"
@@ -19,7 +20,7 @@ class GoodnatureBleListener : public esp32_ble_tracker::ESPBTDeviceListener, pub
   float get_setup_priority() const override { return setup_priority::DATA; }
 
  protected:
-  void parse_kill_info(const std::vector<unsigned char> &data);
+  void parse_kill_info(uint64_t address, const std::vector<unsigned char> &data);
   std::string reverse_serial(const std::string &serial);
   uint32_t parse_timestamp(const std::vector<unsigned char> &data);
 
@@ -31,7 +32,7 @@ class GoodnatureBleListener : public esp32_ble_tracker::ESPBTDeviceListener, pub
   uint32_t last_activation_ = 0;
   std::string name_;
   uint64_t mac_address_;
-  std:string serial_;
+  std::string serial_;
   uint64_t last_seen_mac_address_;
   std::string last_seen_serial_;
 };

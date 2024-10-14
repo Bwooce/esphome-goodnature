@@ -38,7 +38,7 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
   return false;
 }
 
-void GoodnatureBleListener::parse_kill_info(uint64 address, const std::vector<unsigned char> &data) {
+void GoodnatureBleListener::parse_kill_info(uint64_t address, const std::vector<unsigned char> &data) {
   if (data.size() < 22) {
     ESP_LOGE(TAG, "Invalid kill info data length");
     return;
@@ -113,7 +113,7 @@ void GoodnatureBleListener::dump_config() {
   ESP_LOGCONFIG(TAG, "Goodnature BLE");
   LOG_SENSOR("  ", "Kill Count", this->kill_count_);
   LOG_SENSOR("  ", "Battery Level", this->battery_level_);
-  LOG_SENSOR("  ", "Last Activation", this->last_activation);
+  LOG_SENSOR("  ", "Last Activation", this->last_activation_);
 }
 
 } // namespace goodnature_ble
