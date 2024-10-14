@@ -31,7 +31,7 @@ CONF_LAST_ACTIVATION = 'last_activation'
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(GoodnatureBle),
-    cv.Optional(CONF_NAME): cv.name,
+    cv.Optional(CONF_NAME): cv.valid_name,
     cv.Optional(CONF_MAC_ADDRESS): cv.mac_address,
     cv.Optional(CONF_KILL_COUNT): sensor.sensor_schema(
         UNIT_EMPTY,
