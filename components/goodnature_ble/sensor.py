@@ -37,6 +37,7 @@ CONFIG_SCHEMA = cv.Schema({
         UNIT_EMPTY,
         ICON_SECURITY,
         0,
+        DEVICE_CLASS_EMPTY,
         STATE_CLASS_TOTAL_INCREASING,
     ),
     cv.Optional(CONF_BATTERY_LEVEL): sensor.sensor_schema(
