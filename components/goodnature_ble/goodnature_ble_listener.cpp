@@ -20,7 +20,7 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
     ESP_LOGW(TAG, "mfg adv datas len: %d", mfg_datas.size());
   }
   if (device.get_name() != "GN") {
-    ESP_LOGE(TAG, "Not Goodnature device");
+    ESP_LOGE(TAG, "Not Goodnature device, got %s", device.get_name().c_str());
     return false;
   }
 
@@ -104,9 +104,9 @@ uint32_t GoodnatureBleListener::parse_timestamp(const std::vector<unsigned char>
 
 void GoodnatureBleListener::dump_config() {
   ESP_LOGCONFIG(TAG, "Goodnature BLE");
-  LOG_SENSOR("  ", "Kill Count", kill_count_);
-  LOG_SENSOR("  ", "Battery Level", battery_level_);
-  LOG_SENSOR("  ", "Last Activation", last_activation_);
+  LOG_SENSOR("  ", "Kill Count", kill_count_sensor_);
+  LOG_SENSOR("  ", "Battery Level", battery_level_sensor_);
+  LOG_SENSOR("  ", "Last Activation", last_activation_sensor_);
 }
 
 } // namespace goodnature_ble
