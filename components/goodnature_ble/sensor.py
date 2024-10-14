@@ -32,7 +32,7 @@ CONF_LAST_ACTIVATION = 'last_activation'
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(GoodnatureBle),
     cv.Optional(CONF_NAME): cv.name,
-    cv.Optional(CONF_MAC_ADDRESS): cv.mac_address,   
+    cv.Optional(CONF_MAC_ADDRESS): cv.mac_address,
     cv.Optional(CONF_KILL_COUNT): sensor.sensor_schema(
         UNIT_EMPTY,
         ICON_SECURITY,
@@ -64,12 +64,12 @@ async def to_code(config):
         cg.add(var.set_address(config[CONF_MAC_ADDRESS].as_hex))
 
     if CONF_NAME in config:
-        cg.add(var.set_name(config[CONF_NAME].as_string))
+        cg.add(var.set_name(config[CONF_NAME]))
 
     if CONF_KILL_COUNT in config:
         sens = await sensor.new_sensor(config[CONF_KILL_COUNT])
         cg.add(var.set_kill_count_sensor(sens))
-        
+
     if CONF_BATTERY_LEVEL in config:
         sens = await sensor.new_sensor(config[CONF_BATTERY_LEVEL])
         cg.add(var.set_battery_level_sensor(sens))
