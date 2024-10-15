@@ -19,7 +19,7 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
   if (mfg_datas.size() > 1) {
     ESP_LOGW(TAG, "mfg adv datas len: %d", mfg_datas.size());
   }
-  if (device.get_name() != "GN") {
+  if (strcmp(device.get_name().c_str(),"GN") != 0) {
     ESP_LOGE(TAG, "Not Goodnature device, got %s", device.get_name().c_str());
     return false;
   }
