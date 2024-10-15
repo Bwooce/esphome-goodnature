@@ -5,6 +5,9 @@
 namespace esphome {
 namespace goodnature_ble {
 
+void print_buffer(const uint8_t *data, size_t length);
+
+
 static const char *TAG = "goodnature_ble";
 
 void GoodnatureBleListener::set_name(const std::string &name) {
@@ -29,7 +32,7 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
     for (auto data : mfg_datas) {
       ESP_LOGW(TAG, " mfg adv datas - %s: (length %i)", data.uuid.to_string().c_str(), data.data.size());
       //ESP_LOG_BUFFER_HEX_LEVEL(TAG, &data.data[0], data.data.size(), ESP_LOG_ERROR);
-      print_buffer(data.data,data.size());
+      print_buffer(data.data,data.data.size());
       ESP_LOGW(TAG, "DATA END");
     }
   }
