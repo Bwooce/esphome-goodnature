@@ -29,11 +29,8 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
     for (auto data : mfg_datas) {
       ESP_LOGW(TAG, " mfg adv datas - %s: (length %i)", data.uuid.to_string().c_str(), data.data.size());
       //ESP_LOG_BUFFER_HEX_LEVEL(TAG, &data.data[0], data.data.size(), ESP_LOG_ERROR);
-      std::string hex;
-      for(int i=0;i<data.data.size();i++) {
-        hex << data[i];
-      }
-      ESP_LOGW(TAG, "DATA: %s",hex.c_str());
+      print_buffer(data.data,data.size());
+      ESP_LOGW(TAG, "DATA END");
     }
   }
 
@@ -122,6 +119,23 @@ void GoodnatureBleListener::dump_config() {
   LOG_SENSOR("  ", "Battery Level", battery_level_sensor_);
   LOG_SENSOR("  ", "Last Activation", last_activation_sensor_);
 }
+
+// TEMP from weikai.cpp
+ void print_buffer(const uint8_t *data, size_t length) {
+   char hex_buffer[100];
+   hex_buffer[(3 * 32) + 1] = 0;
+   for (size_t i = 0; i < length; i++) {
+     snprintf(&hex_buffer[3 * (i % 32)], sizeof(hex_buffer), "%02X ", data[i]);
+     if (i % 32 == 31) {
+       ESP_LOGVV(TAG, "   %s", hex_buffer);
+     }
+   }
+   if (length % 32) {
+     // null terminate if incomplete line
+     hex_buffer[3 * (length % 32) + 2] = 0;
+     ESP_LOGVV(TAG, "   %s", hex_buffer);
+   }
+ }
 
 } // namespace goodnature_ble
 } // namespace esphome
