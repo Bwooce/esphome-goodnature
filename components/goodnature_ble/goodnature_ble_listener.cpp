@@ -130,13 +130,13 @@ void GoodnatureBleListener::dump_config() {
    for (size_t i = 0; i < length; i++) {
      snprintf(&hex_buffer[3 * (i % 32)], sizeof(hex_buffer), "%02X ", data[i]);
      if (i % 32 == 31) {
-       ESP_LOGVV(TAG, "   %s", hex_buffer);
+       ESP_LOGD(TAG, "   %s", hex_buffer);
      }
    }
    if (length % 32) {
      // null terminate if incomplete line
      hex_buffer[3 * (length % 32) + 2] = 0;
-     ESP_LOGVV(TAG, "   %s", hex_buffer);
+     ESP_LOGD(TAG, "   %s", hex_buffer);
    }
  }
 
