@@ -25,9 +25,7 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
     ESP_LOGE(TAG, "parse_device(): no mfg data");
   }
   if (mfg_datas.size() > 0) {
-    ESP_LOGD(TAG, "got mfg data");
     for (auto data : mfg_datas) {
-        ESP_LOGD(TAG, "got mfr data2");
         ESP_LOGW(TAG, " mfg adv datas - %s: (length %i)", data.uuid.to_string().c_str(), data.data.size());
         ESP_LOG_BUFFER_HEX_LEVEL(TAG, &data.data[0], data.data.size(), ESP_LOG_ERROR);
     }
@@ -35,11 +33,11 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
 
   auto services = device.get_service_datas();
   for (auto &service_data : services) {
-    if (service_data.uuid.contains(0xD3, 0x0D)) {
-      auto kill_info = service_data.data;
-      parse_kill_info(device.address_uint64(), kill_info);
-      return true;
-    }
+    //if (service_data.uuid.contains(0xD3, 0x0D)) {
+    //  auto kill_info = service_data.data;
+    //  parse_kill_info(device.address_uint64(), kill_info);
+    //  return true;
+    //}
     ESP_LOGW(TAG, " mfg svc datas - %s: (length %i)", service_data.uuid.to_string().c_str(), service_data.data.size());
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, &service_data.data[0], service_data.data.size(), ESP_LOG_ERROR);
   }
