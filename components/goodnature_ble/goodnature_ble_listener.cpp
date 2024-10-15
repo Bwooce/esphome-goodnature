@@ -12,19 +12,22 @@ void GoodnatureBleListener::set_name(const std::string &name) {
 }
 
 bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &device) {
+
+  if (strcmp(device.get_name().c_str(),"GN") != 0) {
+    //ESP_LOGE(TAG, "Not Goodnature device, got %s", device.get_name().c_str());
+    return false;
+  }
+
+  ESP_LOGD(TAG, "Found Goodnature device: %s", device.address_str().c_str());
+
   auto mfg_datas = device.get_manufacturer_datas();
   if (mfg_datas.empty()) {
     ESP_LOGE(TAG, "parse_device(): no mfg data");
   }
   if (mfg_datas.size() > 1) {
     ESP_LOGW(TAG, "mfg adv datas len: %d", mfg_datas.size());
+    ESP_LOG_BUFFER_HEX_LEVEL(TAG, &mfg_datas.data[0], mfg_datas.data.size(), ESP_LOG_WARNING);
   }
-  if (strcmp(device.get_name().c_str(),"GN") != 0) {
-    ESP_LOGE(TAG, "Not Goodnature device, got %s", device.get_name().c_str());
-    return false;
-  }
-
-  ESP_LOGD(TAG, "Found Goodnature device: %s", device.address_str().c_str());
 
   auto services = device.get_service_datas();
   for (auto &service_data : services) {
