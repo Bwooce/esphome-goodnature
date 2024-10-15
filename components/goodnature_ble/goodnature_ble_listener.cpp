@@ -32,7 +32,7 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
         for(int i=0;i<data.data.size();i++) {
           Serial.print((uint8_t)data.data[i], HEX);
         }
-      }
+      
     }
   }
 
