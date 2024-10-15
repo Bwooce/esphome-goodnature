@@ -30,7 +30,7 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
         ESP_LOGW(TAG, " mfg adv datas - %s: (length %i)", data.uuid.to_string().c_str(), data.data.size());
         //ESP_LOG_BUFFER_HEX_LEVEL(TAG, &data.data[0], data.data.size(), ESP_LOG_ERROR);
         for(int i=0;i<data.data.size();i++) {
-          Serial.print((uint8_t)data.data[i], HEX);
+          ESP_LOGD(TAG, "0x%X", (uint8_t)data.data[i]);
         }
       
     }
