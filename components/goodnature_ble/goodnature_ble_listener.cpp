@@ -26,7 +26,7 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
   }
   if (mfg_datas.size() > 1) {
     ESP_LOGW(TAG, "mfg adv datas len: %d", mfg_datas.size());
-    ESP_LOG_BUFFER_HEX_LEVEL(TAG, &mfg_datas.data[0], mfg_datas.data.size(), ESP_LOG_WARNING);
+    ESP_LOG_BUFFER_HEX_LEVEL(TAG, &mfg_datas.data[0], mfg_datas.data.size(), ESP_LOG_WARN);
   }
 
   auto services = device.get_service_datas();
