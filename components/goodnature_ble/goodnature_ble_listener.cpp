@@ -27,7 +27,7 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
   if (mfg_datas.size() > 0) {
     for (auto data : mfg_datas) {
         ESP_LOGW(TAG, " mfg adv datas - %s: (length %i)", data.uuid.to_string().c_str(), data.data.size());
-        ESP_LOG_BUFFER_HEX_LEVEL(TAG, &data.data[0], data.data.size(), ESP_LOG_ERROR);
+        //ESP_LOG_BUFFER_HEX_LEVEL(TAG, &data.data[0], data.data.size(), ESP_LOG_ERROR);
     }
   }
 
@@ -39,7 +39,7 @@ bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &d
     //  return true;
     //}
     ESP_LOGW(TAG, " mfg svc datas - %s: (length %i)", service_data.uuid.to_string().c_str(), service_data.data.size());
-    ESP_LOG_BUFFER_HEX_LEVEL(TAG, &service_data.data[0], service_data.data.size(), ESP_LOG_ERROR);
+    //ESP_LOG_BUFFER_HEX_LEVEL(TAG, &service_data.data[0], service_data.data.size(), ESP_LOG_ERROR);
   }
 
   return false;
