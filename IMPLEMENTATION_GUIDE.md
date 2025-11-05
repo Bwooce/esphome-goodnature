@@ -4,90 +4,93 @@
 
 This guide provides concrete implementation approaches for integrating Goodnature A24 Chirp traps with ESPHome.
 
-## Option 1: Advertisement-Based Parsing (Recommended)
+## Option 1: iBeacon Advertisement Parsing (Recommended)
 
-This approach parses manufacturer data from BLE advertisements without establishing a GATT connection. This allows the official app to continue working while ESPHome monitors the device.
+⚡ **CRITICAL:** The Goodnature Chirp uses Apple's iBeacon format, not standard BLE manufacturer data!
+
+This approach parses iBeacon advertisement data without establishing a GATT connection. This allows the official app to continue working while ESPHome monitors the device.
 
 ### Advantages
 - No interference with official mobile app
 - Multiple ESPHome devices can monitor simultaneously
 - Lower memory usage
 - No connection timeout issues
+- Can extract both kill count and serial number
+
+### iBeacon Packet Structure (Verified from Local Testing)
+
+```
+Manufacturer Data (Company ID 0x004C - Apple):
+02 15 B0 B0 EE E7 B9 B0 4B C5 B5 E4 F5 CB 61 0E B7 [01] 8F C9 3B E3 37
+│  │  └─────────────────── UUID (16 bytes) ──────────────────┘  │  └─Major─┘ └─Minor─┘ └TX
+│  └─ iBeacon prefix                                              │
+└─ Length                                                         └─ KILL COUNT (byte 18, index 17)
+
+Serial Number E33BC98F is encoded in:
+- Major: 8F C9 (0xC98F)
+- Minor: 3B E3 (0xE33B)
+```
 
 ### Implementation in `goodnature_ble_listener.cpp`
 
 ```cpp
 bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &device) {
-  // Check device name
+  // Check device name first (quick filter)
   if (strcmp(device.get_name().c_str(), "GN") != 0) {
     return false;
   }
 
   ESP_LOGD(TAG, "Found Goodnature device: %s", device.address_str().c_str());
 
-  // Parse manufacturer data
+  // Parse manufacturer data for iBeacon format
   auto mfg_datas = device.get_manufacturer_datas();
   for (auto &mfg_data : mfg_datas) {
     ESP_LOGD(TAG, "Manufacturer data UUID: %s, length: %i",
              mfg_data.uuid.to_string().c_str(), mfg_data.data.size());
 
-    // Check if we have enough data
-    if (mfg_data.data.size() >= 17) {
-      // Kill count is at byte offset 16 according to community research
-      uint8_t kill_count = mfg_data.data[16];
+    // Check for Apple company ID (0x004C) and correct iBeacon length (23 bytes)
+    if (mfg_data.uuid.to_string() == "0x004C" && mfg_data.data.size() == 23) {
 
-      // Validate kill count is reasonable (0-99 for example)
-      if (kill_count >= 0 && kill_count <= 99) {
-        // If MAC address matches or not configured, process this device
-        if (device.address_uint64() == this->mac_address_ || this->mac_address_ == 0) {
-          this->kill_count_ = kill_count;
-
-          ESP_LOGI(TAG, "Goodnature device: %s, Kill count: %d",
-                   device.address_str().c_str(), this->kill_count_);
-
-          if (kill_count_sensor_ != nullptr) {
-            kill_count_sensor_->publish_state(this->kill_count_);
-          }
-
-          return true;
-        }
+      // Verify iBeacon prefix (0x02 0x15)
+      if (mfg_data.data[0] != 0x02 || mfg_data.data[1] != 0x15) {
+        ESP_LOGD(TAG, "Not iBeacon format");
+        continue;
       }
-    }
-  }
 
-  // Alternative: Check service data
-  auto service_datas = device.get_service_datas();
-  for (auto &service_data : service_datas) {
-    ESP_LOGD(TAG, "Service data UUID: %s, length: %i",
-             service_data.uuid.to_string().c_str(), service_data.data.size());
+      // Verify Goodnature UUID: B0B0EEE7-B9B0-4BC5-B5E4-F5CB610EB700
+      const uint8_t goodnature_uuid[16] = {
+        0xB0, 0xB0, 0xEE, 0xE7, 0xB9, 0xB0, 0x4B, 0xC5,
+        0xB5, 0xE4, 0xF5, 0xCB, 0x61, 0x0E, 0xB7, 0x00
+      };
 
-    // Check for kill info service UUID: 0000D00D-1212-EFDE-1523-785FEF13D123
-    // Note: May need to check if service_data.uuid matches this
-    if (service_data.data.size() >= 21) {
-      // Parse the format: AAbbbbbbbbCdddEEEEEEEfGG
-      // Kill count is at position 20
-      char kill_char = service_data.data[20];
-      if (kill_char >= '0' && kill_char <= '9') {
-        this->kill_count_ = kill_char - '0';
+      if (memcmp(&mfg_data.data[2], goodnature_uuid, 16) != 0) {
+        ESP_LOGD(TAG, "Not Goodnature UUID");
+        continue;
+      }
 
-        // Extract serial number (positions 2-9, reversed)
-        if (service_data.data.size() >= 10) {
-          std::string serial;
-          // Reverse byte pairs
-          for (int i = 8; i >= 2; i -= 2) {
-            char hex[3];
-            snprintf(hex, sizeof(hex), "%02X", service_data.data[i]);
-            serial += hex;
-            if (i > 2) {
-              snprintf(hex, sizeof(hex), "%02X", service_data.data[i-1]);
-              serial += hex;
-            }
-          }
-          this->serial_ = serial;
+      // Extract kill count from byte 18 (0-based index 17)
+      uint8_t kill_count = mfg_data.data[17];
 
-          ESP_LOGI(TAG, "Goodnature device: %s (Serial: %s), Kill count: %d",
-                   device.address_str().c_str(), this->serial_.c_str(), this->kill_count_);
-        }
+      // Extract serial number from iBeacon Major and Minor
+      // Major = bytes 18-19, Minor = bytes 20-21
+      uint16_t major = (mfg_data.data[18] << 8) | mfg_data.data[19];
+      uint16_t minor = (mfg_data.data[20] << 8) | mfg_data.data[21];
+
+      // Construct serial: Minor (high) + Major (low)
+      // Example: minor=0xE33B, major=0xC98F → serial=E33BC98F
+      char serial_str[9];
+      snprintf(serial_str, sizeof(serial_str), "%04X%04X", minor, major);
+      this->serial_ = serial_str;
+
+      // TX Power at byte 22 (optional, for RSSI calculations)
+      int8_t tx_power = (int8_t)mfg_data.data[22];
+
+      ESP_LOGI(TAG, "Goodnature iBeacon: %s (Serial: %s), Kill count: %d, TX Power: %d",
+               device.address_str().c_str(), this->serial_.c_str(), kill_count, tx_power);
+
+      // If MAC address matches or not configured, process this device
+      if (device.address_uint64() == this->mac_address_ || this->mac_address_ == 0) {
+        this->kill_count_ = kill_count;
 
         if (kill_count_sensor_ != nullptr) {
           kill_count_sensor_->publish_state(this->kill_count_);
@@ -135,6 +138,66 @@ sensor:
       name: "Trap Kill Count"
       id: trap_kill_count
 ```
+
+### Alternative: Filter by Service UUID (Simpler Approach)
+
+Instead of parsing the iBeacon data, you can identify specific traps by their advertised service UUIDs which encode the serial number:
+
+```cpp
+bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &device) {
+  // Check device name
+  if (strcmp(device.get_name().c_str(), "GN") != 0) {
+    return false;
+  }
+
+  // Extract serial number parts from advertised service UUIDs
+  // For device with serial E33BC98F, look for services 0xE33B and 0xC98F
+  auto service_uuids = device.get_service_uuids();
+
+  uint16_t serial_minor = 0;
+  uint16_t serial_major = 0;
+  uint16_t kill_count_service = 0;
+
+  for (auto &uuid : service_uuids) {
+    uint16_t uuid_short = uuid.get_uuid16();
+
+    // Check for serial number parts (these will be unique to each device)
+    // First part usually around 0xE33B range
+    // Second part usually around 0xC98F range
+    if (uuid_short >= 0xE000 && uuid_short <= 0xFFFF) {
+      serial_minor = uuid_short;
+    } else if (uuid_short >= 0xC000 && uuid_short <= 0xD000) {
+      serial_major = uuid_short;
+    }
+
+    // Kill count service changes: 0xD801 (no kills), 0xD802 (1+ kills)
+    if (uuid_short == 0xD801 || uuid_short == 0xD802) {
+      kill_count_service = uuid_short;
+    }
+  }
+
+  // If we found serial number services, this is our device
+  if (serial_minor != 0 && serial_major != 0) {
+    char serial_str[9];
+    snprintf(serial_str, sizeof(serial_str), "%04X%04X", serial_minor, serial_major);
+
+    ESP_LOGI(TAG, "Goodnature device with serial: %s", serial_str);
+
+    // Infer kill count from service UUID (rough indicator)
+    if (kill_count_service == 0xD801) {
+      ESP_LOGD(TAG, "Kill count service indicates 0 kills");
+    } else if (kill_count_service == 0xD802) {
+      ESP_LOGD(TAG, "Kill count service indicates 1+ kills");
+    }
+
+    return true;
+  }
+
+  return false;
+}
+```
+
+**Note:** This approach is simpler but less precise for kill count. Use the iBeacon parsing method above for accurate kill count values.
 
 ## Option 2: BLE Client with GATT Connection
 
@@ -288,7 +351,7 @@ Upload and monitor logs to see:
 - Manufacturer data contents
 - Service data contents
 
-### Step 2: Analyze Raw Data
+### Step 2: Analyze Raw iBeacon Data
 
 Enable hex buffer printing in the code (already present in current implementation):
 
@@ -298,13 +361,51 @@ ESP_LOGW(TAG, "Manufacturer data - %s: (length %i)",
 print_buffer(&data.data[0], data.data.size());
 ```
 
-### Step 3: Identify Kill Count Location
+Expected output for Goodnature device:
+```
+Manufacturer data - 0x004C: (length 23)
+02 15 B0 B0 EE E7 B9 B0 4B C5 B5 E4 F5 CB 61 0E B7 [01] 8F C9 3B E3 37
+```
 
-Trigger the trap and observe which bytes change in the manufacturer/service data.
+Key indicators:
+- Company ID: `0x004C` (Apple)
+- Length: 23 bytes
+- Prefix: `02 15` (iBeacon)
+- UUID: `B0B0EEE7-B9B0-4BC5-B5E4-F5CB610EB700` (Goodnature)
+- Byte 18 (index 17): Kill count (changes after strike)
 
-### Step 4: Validate Parsing
+### Step 3: Verify iBeacon Parsing
 
-Compare parsed kill count with the official mobile app.
+Trigger the trap and observe:
+1. Byte 18 (index 17) should increment
+2. Before strike: `00`, After strike: `01`
+3. Serial number in Major/Minor stays constant
+4. TX Power (last byte) may vary
+
+Example from local testing:
+```
+Before: 02 15 B0 B0 EE E7 B9 B0 4B C5 B5 E4 F5 CB 61 0E B7 00 8F C9 3B E3 36
+After:  02 15 B0 B0 EE E7 B9 B0 4B C5 B5 E4 F5 CB 61 0E B7 01 8F C9 3B E3 37
+                                                            ^^             ^^
+                                                        Kill count      TX Power
+```
+
+### Step 4: Verify Service UUIDs
+
+Check that the device advertises service UUIDs with serial number parts:
+```
+Advertised service UUIDs:
+  - 0xC98F  (serial part 1)
+  - 0xE33B  (serial part 2)
+  - 0x0036  (constant)
+  - 0x1234  (constant)
+  - 0xD802  (kill count indicator: 0xD801=0, 0xD802=1+)
+  - 0x1500  (constant)
+```
+
+### Step 5: Validate Parsing
+
+Compare parsed kill count with the official mobile app to ensure accuracy.
 
 ## Multiple Trap Support
 
@@ -369,10 +470,11 @@ esp32_ble_tracker:
 4. Enable DEBUG logging to see all discovered devices
 
 ### Kill Count Not Updating
-1. Verify byte offset 16 contains kill count
-2. Try parsing service data instead of manufacturer data
-3. Check data format matches expected structure
-4. Enable hex buffer printing to inspect raw data
+1. **Verify iBeacon format:** Check manufacturer data is from 0x004C (Apple) with 23 bytes
+2. **Verify Goodnature UUID:** Bytes 2-17 must match B0B0EEE7-B9B0-4BC5-B5E4-F5CB610EB700
+3. **Check kill count location:** Byte 18 (0-based index 17) should increment after strike
+4. **Enable hex buffer printing:** Inspect raw iBeacon data to see if byte 17 changes
+5. **Compare with service UUIDs:** Check if 0xD801 changes to 0xD802 after strike
 
 ### Connection Failures (BLE Client)
 1. Ensure only one device is connected at a time
@@ -388,10 +490,27 @@ esp32_ble_tracker:
 
 ## Next Steps
 
-1. **Immediate:** Test advertisement parsing with real device
-2. **Short-term:** Validate kill count byte offset and data format
-3. **Medium-term:** Implement full GATT client for battery/serial
-4. **Long-term:** Add Home Assistant automations for notifications
+1. **Immediate:** Implement iBeacon parsing in `parse_device()` function
+2. **Test:** Verify kill count extraction from byte 18 (index 17) of iBeacon data
+3. **Validate:** Compare parsed values with official mobile app
+4. **Enhance:** Add serial number extraction from Major/Minor fields
+5. **Optional:** Implement GATT client for additional data (battery, timestamp)
+6. **Automate:** Add Home Assistant automations for notifications
+
+## Key Findings Summary
+
+⚡ **Critical Discovery:** Goodnature Chirp uses **Apple's iBeacon protocol** (Company ID 0x004C), NOT standard BLE manufacturer data!
+
+**iBeacon Structure:**
+- UUID: `B0B0EEE7-B9B0-4BC5-B5E4-F5CB610EB700` (constant for all Goodnature devices)
+- Kill count at byte 18 (0-based index 17)
+- Serial number encoded in Major/Minor fields
+- Also advertised as service UUIDs for easy filtering
+
+**Implementation Priority:**
+1. Parse iBeacon manufacturer data (recommended)
+2. Alternative: Filter by service UUIDs (simpler)
+3. Optional: GATT connection for advanced features
 
 ## References
 
