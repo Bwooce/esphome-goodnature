@@ -107,9 +107,44 @@ Currently, this implementation **does not "calm" the trap** after reading the ki
 - It times out (battery saving feature)
 
 **Why not calm it?**
-- We haven't yet discovered the correct GATT command to calm the device
-- See [CALMING_GUIDE.md](CALMING_GUIDE.md) for how to help discover this
-- Current implementation works perfectly for monitoring without calming
+- We haven't yet discovered the correct GATT command
+- **But you can help!** See testing section below
+
+**Is this a problem?**
+- No! The implementation works great for monitoring
+- Battery impact is minimal
+- Trap will calm itself or via official app
+
+## 🧪 Help Discover the Calm Command (Optional)
+
+Want to contribute? We've made it **easy** to test!
+
+### Quick Test with ESPHome
+
+1. Flash the test configuration:
+   ```bash
+   esphome run goodnature_test_calm.yaml
+   ```
+
+2. Trigger your trap (activate it manually)
+
+3. Press test buttons in Home Assistant to try different calm commands
+
+4. Watch which one makes the trap stop broadcasting!
+
+**No pairing required** - the trap accepts connections without authentication.
+
+See **[TESTING_CALM.md](TESTING_CALM.md)** for detailed step-by-step guide.
+
+### Even Easier: Use nRF Connect App
+
+1. Download "nRF Connect" app on your phone
+2. Connect to device "GN" (no pairing needed!)
+3. Navigate to service `0xD00D`
+4. Try writing `0x00` to characteristic `0xD20D`
+5. Check if device stops broadcasting
+
+**10 minutes of testing could help everyone!** 🙏
 
 ## Troubleshooting
 
