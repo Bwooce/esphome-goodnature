@@ -15,6 +15,10 @@ ota:
 
 # Enable logging
 logger:
+  level: DEBUG  # Change to INFO after testing
+  logs:
+    esp32_ble_tracker: DEBUG  # See all BLE devices
+    goodnature_ble: DEBUG     # See iBeacon parsing details
 
 # Enable Web server
 web_server:
@@ -23,19 +27,24 @@ web_server:
 # Enable Bluetooth Low Energy
 esp32_ble_tracker:
 
-# Sensor configurations
+# Sensor configuration for Goodnature trap
+# Now with proper iBeacon parsing!
 sensor:
   - platform: goodnature_ble
-    mac_address: "D3:58:7F:15:99:0B"
-    name: "Front yard trap"
-  - platform: goodnature_ble
+    mac_address: "D3:58:7F:15:99:0B"  # Your trap's MAC address
     kill_count:
-      name: "Goodnature Kill Count"
-      id: goodnature_kill_count
-    battery_level:
-      name: "Goodnature Battery Level"
-      id: goodnature_battery_level
-    last_activation:
-      name: "Goodnature Last Activation"
-      id: goodnature_last_activation
+      name: "Front Yard Trap Kill Count"
+      id: front_yard_kill_count
+    # battery_level and last_activation require GATT connection (not yet implemented)
+    # battery_level:
+    #   name: "Front Yard Trap Battery"
+    # last_activation:
+    #   name: "Front Yard Trap Last Activation"
+
+# Example for a second trap (optional)
+#  - platform: goodnature_ble
+#    mac_address: "D7:AC:E9:XX:XX:XX"
+#    kill_count:
+#      name: "Back Yard Trap Kill Count"
+#      id: back_yard_kill_count
 

@@ -17,36 +17,75 @@ void GoodnatureBleListener::set_name(const std::string &name) {
 bool GoodnatureBleListener::parse_device(const esp32_ble_tracker::ESPBTDevice &device) {
 
   if (strcmp(device.get_name().c_str(),"GN") != 0) {
-    //ESP_LOGE(TAG, "Not Goodnature device, got %s", device.get_name().c_str());
     return false;
   }
 
   ESP_LOGD(TAG, "Found Goodnature device: %s", device.address_str().c_str());
 
+  // Parse manufacturer data for iBeacon format
   auto mfg_datas = device.get_manufacturer_datas();
-  if (mfg_datas.empty()) {
-    ESP_LOGE(TAG, "parse_device(): no mfg data");
-  }
-  if (mfg_datas.size() > 0) {
-    ESP_LOGD(TAG, "mfg data");
-    for (auto data : mfg_datas) {
-      ESP_LOGW(TAG, " mfg adv datas - %s: (length %i)", data.uuid.to_string().c_str(), data.data.size());
-      //ESP_LOG_BUFFER_HEX_LEVEL(TAG, &data.data[0], data.data.size(), ESP_LOG_ERROR);
-      print_buffer(&data.data[0],data.data.size());
-      ESP_LOGW(TAG, "DATA END");
-    }
-  }
+  for (auto &mfg_data : mfg_datas) {
+    ESP_LOGD(TAG, "Manufacturer data UUID: %s, length: %zu",
+             mfg_data.uuid.to_string().c_str(), mfg_data.data.size());
 
-  auto services = device.get_service_datas();
-  for (auto &service_data : services) {
-    ESP_LOGD(TAG, "service data");
-    //if (service_data.uuid.contains(0xD3, 0x0D)) {
-    //  auto kill_info = service_data.data;
-    //  parse_kill_info(device.address_uint64(), kill_info);
-    //  return true;
-    //}
-    ESP_LOGW(TAG, " mfg svc datas - %s: (length %i)", service_data.uuid.to_string().c_str(), service_data.data.size());
-    //ESP_LOG_BUFFER_HEX_LEVEL(TAG, &service_data.data[0], service_data.data.size(), ESP_LOG_ERROR);
+    // Check for Apple company ID (0x004C) and correct iBeacon length (23 bytes)
+    if (mfg_data.uuid.to_string() == "0x004C" && mfg_data.data.size() == 23) {
+
+      // For debugging: print the raw iBeacon data
+      ESP_LOGD(TAG, "Found Apple manufacturer data (iBeacon):");
+      print_buffer(&mfg_data.data[0], mfg_data.data.size());
+
+      // Verify iBeacon prefix (0x02 0x15)
+      if (mfg_data.data[0] != 0x02 || mfg_data.data[1] != 0x15) {
+        ESP_LOGD(TAG, "Not iBeacon format (prefix mismatch)");
+        continue;
+      }
+
+      // Verify Goodnature UUID: B0B0EEE7-B9B0-4BC5-B5E4-F5CB610EB700
+      const uint8_t goodnature_uuid[16] = {
+        0xB0, 0xB0, 0xEE, 0xE7, 0xB9, 0xB0, 0x4B, 0xC5,
+        0xB5, 0xE4, 0xF5, 0xCB, 0x61, 0x0E, 0xB7, 0x00
+      };
+
+      if (memcmp(&mfg_data.data[2], goodnature_uuid, 16) != 0) {
+        ESP_LOGD(TAG, "Not Goodnature UUID");
+        continue;
+      }
+
+      // Extract kill count from byte 18 (0-based index 17)
+      uint8_t kill_count = mfg_data.data[17];
+
+      // Extract serial number from iBeacon Major and Minor
+      // Major = bytes 18-19, Minor = bytes 20-21
+      uint16_t major = (mfg_data.data[18] << 8) | mfg_data.data[19];
+      uint16_t minor = (mfg_data.data[20] << 8) | mfg_data.data[21];
+
+      // Construct serial: Minor (high) + Major (low)
+      // Example: minor=0xE33B, major=0xC98F → serial=E33BC98F
+      char serial_str[9];
+      snprintf(serial_str, sizeof(serial_str), "%04X%04X", minor, major);
+      this->serial_ = serial_str;
+
+      // TX Power at byte 22 (optional, for RSSI calculations)
+      int8_t tx_power = (int8_t)mfg_data.data[22];
+
+      ESP_LOGI(TAG, "Goodnature iBeacon: %s (Serial: %s), Kill count: %d, TX Power: %d dBm",
+               device.address_str().c_str(), this->serial_.c_str(), kill_count, tx_power);
+
+      // If MAC address matches or not configured, process this device
+      if (device.address_uint64() == this->mac_address_ || this->mac_address_ == 0) {
+        this->kill_count_ = kill_count;
+
+        if (kill_count_sensor_ != nullptr) {
+          kill_count_sensor_->publish_state(this->kill_count_);
+        }
+
+        return true;
+      } else {
+        ESP_LOGD(TAG, "MAC address mismatch (configured: %llx, found: %llx)",
+                 this->mac_address_, device.address_uint64());
+      }
+    }
   }
 
   return false;
