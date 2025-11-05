@@ -1,0 +1,87 @@
+esphome:
+  name: goodnature_ble_monitor
+  platform: ESP32
+  board: esp32dev
+
+wifi:
+  ssid: "Your_WiFi_SSID"
+  password: "Your_WiFi_Password"
+
+# Enable Home Assistant API
+api:
+
+# Enable OTA updates
+ota:
+
+# Enable logging
+logger:
+  level: DEBUG  # Change to INFO after testing
+  logs:
+    esp32_ble_tracker: DEBUG
+    goodnature_ble: DEBUG
+    ble_client: DEBUG
+
+# Enable Web server
+web_server:
+  port: 80
+
+# Enable Bluetooth Low Energy
+esp32_ble_tracker:
+
+# BLE Client to connect and "calm" the trap
+# This stops the continuous broadcasting after reading kill count
+ble_client:
+  - mac_address: D3:58:7F:15:99:0B
+    id: goodnature_trap_client
+    auto_connect: false  # Only connect when we detect activity
+    on_connect:
+      then:
+        - logger.log: "Connected to trap - reading data and calming device"
+        # Read the kill data characteristic
+        - ble_client.ble_write:
+            id: goodnature_trap_client
+            service_uuid: '0000D00D-1212-EFDE-1523-785FEF13D123'
+            characteristic_uuid: '0000D30D-1212-EFDE-1523-785FEF13D123'
+            # Write empty array or specific "calm" command
+            # TODO: Need to determine correct value to write
+            value: [0x00]
+        - delay: 500ms
+        - logger.log: "Trap calmed - disconnecting"
+        - ble_client.disconnect:
+            id: goodnature_trap_client
+    on_disconnect:
+      then:
+        - logger.log: "Disconnected from trap"
+
+# Sensor configuration for Goodnature trap
+# This uses advertisement parsing (non-intrusive)
+sensor:
+  - platform: goodnature_ble
+    mac_address: "D3:58:7F:15:99:0B"
+    kill_count:
+      name: "Front Yard Trap Kill Count"
+      id: front_yard_kill_count
+      on_value:
+        then:
+          # When kill count changes, connect to calm the device
+          - logger.log:
+              format: "Kill count changed to %.0f - connecting to calm trap"
+              args: ['x']
+          - ble_client.connect:
+              id: goodnature_trap_client
+
+# Alternative: Use button to manually calm the trap
+button:
+  - platform: template
+    name: "Calm Trap"
+    on_press:
+      - logger.log: "Manually calming trap..."
+      - ble_client.connect:
+          id: goodnature_trap_client
+
+# Status indicators
+binary_sensor:
+  - platform: ble_presence
+    mac_address: D3:58:7F:15:99:0B
+    name: "Trap Broadcasting"
+    id: trap_broadcasting

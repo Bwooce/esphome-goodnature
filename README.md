@@ -100,6 +100,17 @@ This implementation:
 - Allows multiple ESP32 devices to monitor the same trap
 - Low power consumption
 
+### ⚠️ Note: Trap Continues Broadcasting
+
+Currently, this implementation **does not "calm" the trap** after reading the kill count. The trap will continue broadcasting until:
+- The official mobile app connects and calms it
+- It times out (battery saving feature)
+
+**Why not calm it?**
+- We haven't yet discovered the correct GATT command to calm the device
+- See [CALMING_GUIDE.md](CALMING_GUIDE.md) for how to help discover this
+- Current implementation works perfectly for monitoring without calming
+
 ## Troubleshooting
 
 ### "Not Goodnature device"
